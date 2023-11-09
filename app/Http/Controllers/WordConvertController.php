@@ -38,12 +38,34 @@ class WordConvertController extends Controller
             if ($wordFile->getClientOriginalExtension() === 'docx') {
                 $phpWord = IOFactory::load($wordFile);
 
+
+                // Get all sections in the document
                 $sections = $phpWord->getSections();
+
+// Iterate through each section to remove table borders
                 foreach ($sections as $section) {
                     $elements = $section->getElements();
+
+                    // Iterate through elements in the section
                     foreach ($elements as $element) {
-                        if ($element instanceof \PhpOffice\PhpWord\Element\TextRun) {
-                            $element->setDefaultFontName('Arial LatArm');
+                        // Check if the element is a table
+                        if ($element instanceof \PhpOffice\PhpWord\Element\Table) {
+                            $rows = $element->getRows();
+
+                            // Iterate through rows
+                            foreach ($rows as $row) {
+                                $cells = $row->getCells();
+
+                                // Iterate through cells to remove borders
+                                foreach ($cells as $cell) {
+                                    // Access cell properties and remove the border
+                                    $cellStyle = $cell->getStyle();
+                                    $cellStyle->setBorderTopSize(0);
+                                    $cellStyle->setBorderRightSize(0);
+                                    $cellStyle->setBorderBottomSize(0);
+                                    $cellStyle->setBorderLeftSize(0);
+                                }
+                            }
                         }
                     }
                 }
